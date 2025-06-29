@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { transferService } from '../services';
+import { transferAPI } from '../services/api';
 import type { Playlist } from '../types';
 
 interface TransferModalProps {
@@ -25,7 +25,7 @@ const TransferModal: React.FC<TransferModalProps> = ({
     setError('');
 
     try {
-      await transferService.startTransfer({
+      await transferAPI.startTransfer({
         playlist_id: playlist.id,
         youtube_playlist_name: youtubePlaylistName.trim()
       });
@@ -40,10 +40,10 @@ const TransferModal: React.FC<TransferModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg max-w-md w-full p-6">
+      <div className="bg-white rounded-lg max-w-lg w-full p-6">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-lg font-semibold text-gray-900">
-            🚀 Transferir Playlist
+          <h3 className="text-xl font-semibold text-gray-900">
+            🚀 Transferir a YouTube Music
           </h3>
           <button
             onClick={onClose}
@@ -53,22 +53,31 @@ const TransferModal: React.FC<TransferModalProps> = ({
           </button>
         </div>
 
-        <div className="mb-6">
-          <div className="bg-gray-50 rounded-lg p-4 mb-4">
-            <h4 className="font-medium text-gray-900 mb-2">
-              📂 {playlist.name}
-            </h4>
-            <div className="text-sm text-gray-600 space-y-1">
-              <div>🎵 {playlist.total_tracks} canciones</div>
-              {playlist.description && (
-                <div>📝 {playlist.description}</div>
-              )}
-            </div>
+        {/* Información de la playlist */}
+        <div className="bg-blue-50 rounded-lg p-4 mb-6">
+          <h4 className="font-medium text-blue-900 mb-2">📂 {playlist.name}</h4>
+          <div className="text-sm text-blue-700 space-y-1">
+            <div>🎵 {playlist.total_tracks} canciones</div>
+            <div>🆔 ID: {playlist.id}</div>
+            <div>📅 Creado: {new Date(playlist.created_at).toLocaleDateString('es-ES')}</div>
+            {playlist.description && (
+              <div>📝 {playlist.description}</div>
+            )}
+            {playlist.spotify_id && (
+              <div>🔗 Spotify ID: {playlist.spotify_id}</div>
+            )}
           </div>
-          
-          <div className="text-sm text-gray-600">
-            Esta playlist se transferirá a YouTube Music. El proceso puede tomar varios minutos.
-          </div>
+        </div>
+
+        {/* Información sobre el proceso */}
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+          <h5 className="font-medium text-yellow-800 mb-2">ℹ️ Información importante</h5>
+          <ul className="text-sm text-yellow-700 space-y-1">
+            <li>• Las canciones se buscarán automáticamente en YouTube Music</li>
+            <li>• El proceso puede tomar varios minutos</li>
+            <li>• Algunas canciones podrían no encontrarse exactamente</li>
+            <li>• Recibirás un reporte detallado al finalizar</li>
+          </ul>
         </div>
 
         <form onSubmit={handleSubmit}>

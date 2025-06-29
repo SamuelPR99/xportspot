@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { authService } from '../services';
 import type { LoginCredentials } from '../types';
+import SpotifyLoginButton from './SpotifyLoginButton';
 
 interface LoginProps {
   onLogin: () => void;
+  onSwitchToRegister: () => void;
 }
 
-const Login: React.FC<LoginProps> = ({ onLogin }) => {
+const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister }) => {
   const [credentials, setCredentials] = useState<LoginCredentials>({
     username: '',
     password: ''
@@ -22,6 +24,15 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     }));
   };
 
+  const handleSpotifySuccess = (response: any) => {
+    // Este callback se ejecutará después del flujo completo
+    onLogin();
+  };
+
+  const handleSpotifyError = (error: string) => {
+    setError(error);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -29,8 +40,13 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
     try {
       const response = await authService.login(credentials);
-      authService.setToken(response.token);
-      onLogin();
+      if (response.token) {
+        authService.setToken(response.token);
+        window.dispatchEvent(new CustomEvent('auth-changed'));
+        onLogin();
+      } else {
+        setError('No se recibió token de autenticación');
+      }
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Error al iniciar sesión');
     } finally {
@@ -106,9 +122,21 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             </button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-gray-600">
-            <p>¿No tienes cuenta? Contacta al administrador</p>
+          <div className="mt-6 text-center">
+            <button
+              onClick={onSwitchToRegister}
+              className="text-sm text-blue-600 hover:text-blue-800"
+            >
+              ¿No tienes cuenta? Regístrate aquí
+            </button>
           </div>
+        </div>
+
+        <div className="mt-4">
+          <SpotifyLoginButton 
+            onSuccess={handleSpotifySuccess} 
+            onError={handleSpotifyError} 
+          />
         </div>
       </div>
     </div>

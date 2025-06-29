@@ -13,8 +13,60 @@ import type {
 // Servicio de autenticación
 export const authService = {
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
-    const response = await api.post('/auth/token/', credentials);
+    const response = await api.post('/auth/login/', credentials);
     return response.data;
+  },
+
+  register: async (userData: any): Promise<AuthResponse> => {
+    const response = await api.post('/auth/register/', userData);
+    return response.data;
+  },
+
+  // Callback de autenticación con Spotify
+  spotifyCallback: async (code: string): Promise<AuthResponse> => {
+    try {
+      const response = await api.post(`/auth/spotify/connect/`, { code });
+      if (response.data.message) {
+        return { success: true, data: response.data };
+      }
+      return { success: false, error: 'No se recibió confirmación de conexión' };
+    } catch (error: any) {
+      return { 
+        success: false, 
+        error: error.response?.data?.error || 'Error en autenticación con Spotify' 
+      };
+    }
+  },
+
+  // Autenticar o registrar con Spotify
+  spotifyAuthOrRegister: async (code: string): Promise<AuthResponse> => {
+    try {
+      const response = await api.post('/auth/spotify/auth-or-register/', { code });
+      if (response.data.success) {
+        return { 
+          success: true, 
+          data: response.data,
+          user: response.data.user,
+          token: response.data.token
+        };
+      }
+      return { success: false, error: 'No se recibió confirmación de autenticación' };
+    } catch (error: any) {
+      return { 
+        success: false, 
+        error: error.response?.data?.error || 'Error en autenticación con Spotify' 
+      };
+    }
+  },
+
+  // Desconectar cuenta de Spotify
+  disconnectSpotify: async (): Promise<{ success: boolean }> => {
+    try {
+      await api.post('/auth/spotify/disconnect/');
+      return { success: true };
+    } catch (error) {
+      return { success: false };
+    }
   },
 
   logout: () => {
@@ -122,6 +174,45 @@ export const songService = {
   // Obtener una canción específica
   getSong: async (id: number): Promise<Song> => {
     const response = await api.get(`/songs/${id}/`);
+    return response.data;
+  }
+};
+
+// Servicio de Spotify
+export const spotifyService = {
+  // Obtener estado de conexión con Spotify
+  getConnectionStatus: async (): Promise<{
+    is_connected: boolean;
+    spotify_user_id?: string;
+    spotify_display_name?: string;
+    token_valid?: boolean;
+    needs_reconnection?: boolean;
+  }> => {
+    const response = await api.get('/auth/spotify/status/');
+    return response.data;
+  },
+
+  // Obtener URL de autorización
+  getAuthUrl: async (): Promise<{ auth_url: string }> => {
+    const response = await api.get('/auth/spotify/url/');
+    return response.data;
+  },
+
+  // Obtener playlists de Spotify
+  getPlaylists: async (): Promise<{ playlists: any[] }> => {
+    const response = await api.get('/spotify/playlists/');
+    return response.data;
+  },
+
+  // Conectar cuenta de Spotify con código
+  connect: async (code: string): Promise<any> => {
+    const response = await api.post('/auth/spotify/connect/', { code });
+    return response.data;
+  },
+
+  // Desconectar cuenta de Spotify
+  disconnect: async (): Promise<any> => {
+    const response = await api.post('/auth/spotify/disconnect/');
     return response.data;
   }
 };

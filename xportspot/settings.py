@@ -38,8 +38,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
+    # Third party apps
     'rest_framework',
+    'rest_framework.authtoken',
     'corsheaders',
+    
+    # Local apps
     'transfer',
 ]
 
@@ -67,8 +72,8 @@ REST_FRAMEWORK = {
 
 # Configuración de CORS (para desarrollo)
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # React development server
-    "http://127.0.0.1:3000",
+    "http://127.0.0.1:3000",  # React development server (IP específica para Spotify)
+    "http://localhost:3000",  # Backup para desarrollo local
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -148,3 +153,19 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Configuración del modelo de usuario personalizado
+AUTH_USER_MODEL = 'transfer.User'
+
+# Configuración de Spotify
+SPOTIFY_CLIENT_ID = config('SPOTIFY_CLIENT_ID', default='')
+SPOTIFY_CLIENT_SECRET = config('SPOTIFY_CLIENT_SECRET', default='')
+
+# Configuración de Google OAuth (YouTube Music)
+GOOGLE_OAUTH_CLIENT_ID = config('GOOGLE_OAUTH_CLIENT_ID', default='')
+GOOGLE_OAUTH_CLIENT_SECRET = config('GOOGLE_OAUTH_CLIENT_SECRET', default='')
+GOOGLE_OAUTH_REDIRECT_URI = config('GOOGLE_OAUTH_REDIRECT_URI', default='http://localhost:8000/api/google/callback/')
+
+# URLs del proyecto
+FRONTEND_URL = config('FRONTEND_URL', default='http://127.0.0.1:3000')
+BACKEND_URL = config('BACKEND_URL', default='http://127.0.0.1:8000')

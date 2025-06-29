@@ -7,15 +7,34 @@ export interface User {
   last_name: string;
 }
 
+// Tipos para el perfil extendido con Spotify
+export interface UserProfile extends User {
+  spotify_user_id?: string;
+  profile_image?: string;
+  country?: string;
+  spotify_premium: boolean;
+  auto_import_playlists: boolean;
+  email_notifications: boolean;
+  spotify_connected_at?: string;
+  last_spotify_sync?: string;
+  has_spotify_connected: boolean;
+  has_youtube_music_configured: boolean;
+  youtube_music_configured_at?: string;
+  display_name: string;
+}
+
 // Tipos para las canciones
 export interface Song {
   id: number;
-  title: string;
+  name: string;
+  title: string; // Alias para compatibilidad
   artist: string;
   album: string;
-  spotify_track_id: string;
+  spotify_id: string;
   youtube_video_id: string;
   duration_ms: number | null;
+  preview_url?: string;
+  spotify_url?: string;
 }
 
 // Tipos para las relaciones playlist-canción
@@ -30,6 +49,7 @@ export interface PlaylistSong {
 export interface Playlist {
   id: number;
   spotify_id: string;
+  youtube_playlist_id?: string;
   name: string;
   description: string;
   total_tracks: number;
@@ -37,15 +57,19 @@ export interface Playlist {
   updated_at: string;
   user: User;
   songs?: PlaylistSong[];
+  spotify_url: string;
+  youtube_url?: string;
 }
 
 // Tipos para los resultados de transferencia de canciones
 export interface SongTransferResult {
   id: number;
   song: Song;
-  status: 'success' | 'failed' | 'duplicate' | 'not_found';
+  transfer_status: 'success' | 'failed' | 'not_found';
   youtube_video_id: string;
-  search_query: string;
+  youtube_title?: string;
+  youtube_artist?: string;
+  match_confidence: number;
   error_message: string;
   processed_at: string;
 }
@@ -86,8 +110,11 @@ export interface PlaylistImport {
 
 // Tipos para autenticación
 export interface AuthResponse {
-  token: string;
-  user: User;
+  success?: boolean;
+  token?: string;
+  user?: User;
+  error?: string;
+  data?: any;
 }
 
 export interface LoginCredentials {
@@ -105,4 +132,28 @@ export interface TransferProgress {
   successful_transfers: number;
   failed_transfers: number;
   youtube_playlist_id: string;
+}
+
+// Tipos para YouTube Music
+export interface YouTubeMusicStatus {
+  is_configured: boolean;
+  configured_at?: string;
+}
+
+export interface YouTubeMusicGuide {
+  title: string;
+  description: string;
+  steps: {
+    step: number;
+    title: string;
+    description: string;
+  }[];
+  troubleshooting: {
+    problem: string;
+    solution: string;
+  }[];
+}
+
+export interface YouTubeMusicConfig {
+  browser_data: string | object;
 }
